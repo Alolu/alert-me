@@ -54,6 +54,6 @@ def sendPromo(link):
 @sched.scheduled_job('interval',seconds=5)
 def timed_job():
     print("job")
-    getPosts(r.get('https://www.facebook.com/pg/mcdodainville/posts/?ref=page_internal'))
-
+    #getPosts(r.get('https://www.facebook.com/pg/mcdodainville/posts/?ref=page_internal'))
+    sendPromo("test")
 sched.start()
