@@ -46,7 +46,7 @@ def getPosts(src):
             db.insert({'link': link})
 
 def sendPromo(link):
-    r.post("https://hooks.slack.com/services/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",json={
+    r.post("https://hooks.slack.com/services/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",json={
         "text": link,
         "unfurl_links": True
     })
@@ -57,3 +57,4 @@ def timed_job():
     #getPosts(r.get('https://www.facebook.com/pg/mcdodainville/posts/?ref=page_internal'))
     sendPromo("test")
 sched.start()
+ 
