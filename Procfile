@@ -1,1 +1,1 @@
-worker: notif.py
+worker: python notif.py
