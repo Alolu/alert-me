@@ -2,12 +2,12 @@
 import bs4 as bs
 import requests as r
 import re
+import os
 from tinydb import TinyDB, Query
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 sched = BlockingScheduler()
 db = TinyDB('db.json')
-
 dateMatch = [
     u'janvier',
     u'février',
@@ -46,14 +46,14 @@ def getPosts(src):
             db.insert({'link': link})
 
 def sendPromo(link):
-    r.post("https://hooks.slack.com/services/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",json={
+    r.post(os.environ.get("HOOK"),json={
         "text": link,
         "unfurl_links": True
     })
 
 @sched.scheduled_job('interval',seconds=5)
 def timed_job():
-    print("job")
+    print(os.environ.get("HOOK"))
     #getPosts(r.get('https://www.facebook.com/pg/mcdodainville/posts/?ref=page_internal'))
     sendPromo("test")
 sched.start()
