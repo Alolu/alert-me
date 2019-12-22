@@ -51,7 +51,7 @@ def sendPromo(link):
         "unfurl_links": True
     })
 
-@sched.scheduled_job('interval',minutes=30)
+@sched.scheduled_job('interval',seconds=5)
 def timed_job():
     print("job")
     getPosts(r.get('https://www.facebook.com/pg/mcdodainville/posts/?ref=page_internal'))
