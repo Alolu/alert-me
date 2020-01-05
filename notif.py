@@ -22,7 +22,18 @@ dateMatch = [
     u'septembre',
     u'octobre',
     u'novembre',
-    u'décembre'
+    u'décembre',
+    u'January',
+    u'February',
+    u'March',
+    u'April',
+    u'May',
+    u'June',
+    u'July',
+    u'August',
+    u'September',
+    u'November',
+    u'December'
 ]
 interestMatch = [
     "nuggets",
@@ -49,9 +60,8 @@ def getPosts(src):
             sendPromo("http://facebook.com" + link)
             print("Storing in database...")
             db.insert({'link': link})
-        else:
-            print("No relevant post found...")
-
+    if not posts:
+        print("No relevant post found...")
 #Webhook handler
 def sendPromo(link):
     print("Sending to webhook...")
