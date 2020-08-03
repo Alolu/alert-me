@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-import bs4 as bs
-import requests as r
 import re
 import os
+import bs4 as bs
+import requests as r
 from tinydb import TinyDB, Query
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 sched = BlockingScheduler()
-db = TinyDB('db.json')
-hook = os.environ.get("HOOK")
+DB = TinyDB('db.json')
+HOOK = os.environ.get("HOOK")
 
-dateMatch = [
+DATE_MATCH = [
     u'janvier',
     u'février',
     u'mars',
@@ -35,37 +35,39 @@ dateMatch = [
     u'November',
     u'December'
 ]
-interestMatch = [
+INTEREST_MATCH = [
     "nuggets",
     "offre",
     "profiter"
 ]
 
-#Filter functions
 def today(s):
-    return not any(re.compile(re.escape(date)).search(s) for date in dateMatch)
+    """Filtre BS4 permettant de recuperer tout les posts du jour uniquement"""
+    return not any(re.compile(re.escape(date)).search(s) for date in DATE_MATCH)
 def interest(s):
-    return any(re.compile(r'(?i)' + words).search(s) for words in interestMatch)
+    """Filtre BS4 permettant de trouver les posts en rapports avec les mots recherchés"""
+    return any(re.compile(r'(?i)' + words).search(s) for words in INTEREST_MATCH)
 
-#Get posts from page and search for post containing our filters
-def getPosts(src):
-    soup = bs.BeautifulSoup(src.content.decode('utf-8','ignore'),'html.parser')
+def get_posts(src):
+    """Récupère les posts de facebook, prend en param une reponse get a facebook"""
+    soup = bs.BeautifulSoup(src.content.decode('utf-8', 'ignore'),'html.parser')
     allposts = soup.find("div", class_="_1xnd")
     posts = allposts.find_all("span", class_="timestampContent",text=today)
     for post in posts:
         lepost = post.find_parent("div", class_="_4-u2 _4-u8")
         link = post.parent.parent["href"]
-        if lepost.find(text=interest) and not db.search(Query().link == link):
+        if lepost.find(text=interest) and not DB.search(Query().link == link):
             print("Relevant post found : http://facebook.com" + link)
-            sendPromo("http://facebook.com" + link)
+            send_promo("http://facebook.com" + link)
             print("Storing in database...")
-            db.insert({'link': link})
+            DB.insert({'link': link})
     if not posts:
         print("No relevant post found...")
 #Webhook handler
-def sendPromo(link):
+def send_promo(link):
+    """Envoie le lien du post a mon webhook Slack"""
     print("Sending to webhook...")
-    r.post(hook,json={
+    r.post(HOOK,json={
         "text": link,
         "unfurl_links": True
     })
@@ -73,8 +75,9 @@ def sendPromo(link):
 #Scheduled tasks to be ran every 30 minutes
 @sched.scheduled_job('interval', minutes=30)
 def timed_job():
+    """Recupere les posts et les envois tout les 30mins"""
     print("-> Fetching data from facebook")
-    getPosts(r.get('https://www.facebook.com/pg/mcdodainville/posts/?ref=page_internal'))
+    get_posts(r.get('https://www.facebook.com/pg/mcdodainville/posts/?ref=page_internal'))
     print("<- Job done")
 
 print("-->Scheduler started")
